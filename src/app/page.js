@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { Switch } from '@headlessui/react';
 
@@ -8,7 +8,44 @@ function classNames(...classes) {
 }
 
 export default function Home() {
-  const [agreed, setAgreed] = useState(false);
+  const [bookTitle, setBookTitle] = useState('');
+  const [bookAuthor, setBookAuthor] = useState('');
+  const [bookGenre, setBookGenre] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    console.log('book title:', bookTitle);
+    console.log('book author:', bookAuthor);
+    console.log('book genre', bookGenre);
+  }, [bookTitle, bookAuthor, bookGenre]);
+
+  const onSubmitBookRecommendation = async (e) => {
+    e.preventDefault();
+    const body = { title: bookGenre, author: bookAuthor, genre: bookGenre };
+    setLoading(true);
+    try {
+      const response = await fetch('/api/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (response.status !== 200) {
+        alert('something wrong');
+      } else {
+        resetForm();
+        alert('form submitted successfuly');
+      }
+    } catch (error) {
+      console.log('there was an error submitting', error);
+    }
+    setLoading(false);
+  };
+
+  const resetForm = () => {
+    setBookTitle('');
+    setBookAuthor('');
+    setBookGenre('');
+  };
 
   return (
     <div className="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
@@ -33,8 +70,7 @@ export default function Home() {
         </p>
       </div>
       <form
-        action="#"
-        method="POST"
+        onSubmit={onSubmitBookRecommendation}
         className="mx-auto mt-16 max-w-xl sm:mt-20"
       >
         <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
@@ -47,6 +83,8 @@ export default function Home() {
             </label>
             <div className="mt-2.5">
               <input
+                onChange={(e) => setBookTitle(e.target.value)}
+                value={bookTitle}
                 type="text"
                 name="book-name"
                 id="book-name"
@@ -65,6 +103,8 @@ export default function Home() {
             <div className="mt-2.5">
               <input
                 type="text"
+                onChange={(e) => setBookAuthor(e.target.value)}
+                value={bookAuthor}
                 name="author-name"
                 id="author-name"
                 autoComplete="family-name"
@@ -81,6 +121,8 @@ export default function Home() {
             </label>
             <div className="mt-2.5">
               <input
+                value={bookGenre}
+                onChange={(e) => setBookGenre(e.target.value)}
                 type="text"
                 name="genre"
                 id="genre"
@@ -95,7 +137,7 @@ export default function Home() {
             type="submit"
             className="block w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Submit
+            {loading? 'Submitting...': 'Submit'}
           </button>
         </div>
       </form>
