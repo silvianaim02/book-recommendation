@@ -21,11 +21,14 @@ export async function POST(req) {
 
   try {
     if (!title || !author || !genre) {
-      return NextResponse.json({ error: 'please fill the form' }, {status: 400});
+      return NextResponse.json(
+        { error: 'please fill the form' },
+        { status: 400 }
+      );
     }
     const newEntry = await prisma.bookRecommendation.create({
       data: {
-        bookTitle: title, // Correct the spelling here
+        bookTitle: title,
         bookAuthor: author,
         bookGenre: genre,
       },
