@@ -12,12 +12,35 @@ export default function Home() {
   const [bookAuthor, setBookAuthor] = useState('');
   const [bookGenre, setBookGenre] = useState('');
   const [loading, setLoading] = useState(false);
+  const [bookData, setBookData] = useState();
 
   useEffect(() => {
     console.log('book title:', bookTitle);
     console.log('book author:', bookAuthor);
     console.log('book genre', bookGenre);
-  }, [bookTitle, bookAuthor, bookGenre]);
+    console.log(bookData);
+    if (!bookData) {
+      readBookRecomendation();
+    }
+  }, [bookTitle, bookAuthor, bookGenre, bookData]);
+
+  const readBookRecomendation = async () => {
+    try {
+      const response = await fetch('/api/books', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (response.status == 200) {
+        const responseData = await response.json(); // Parse the JSON response body
+        setBookData(responseData.data);
+      } else {
+        const responseData = await response.json(); // Parse the JSON response body
+        console.log(responseData.error); // Log the parsed JSON data
+      }
+    } catch (error) {
+      console.log('there was an error', error);
+    }
+  };
 
   const onSubmitBookRecommendation = async (e) => {
     e.preventDefault();
@@ -30,9 +53,13 @@ export default function Home() {
         body: JSON.stringify(body),
       });
       if (response.status !== 200) {
-        alert('something wrong');
+        const responseData = await response.json(); // Parse the JSON response body
+        alert(responseData.error); // Log the parsed JSON data
       } else {
+        const responseData = await response.json(); // Parse the JSON response body
+        console.log(responseData); // Log the parsed JSON data
         resetForm();
+        readBookRecomendation();
         alert('form submitted successfuly');
       }
     } catch (error) {
@@ -137,10 +164,28 @@ export default function Home() {
             type="submit"
             className="block w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            {loading? 'Submitting...': 'Submit'}
+            {loading ? 'Submitting...' : 'Submit'}
           </button>
         </div>
       </form>
+      <div className="mt-16 flex gap-4 flex-wrap justify-between">
+        {bookData ? (
+          bookData.map((item, index) => (
+            <div
+              key={index}
+              className="block min-w-[400px] p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 "
+            >
+              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 ">
+                {item.bookTitle}
+              </h5>
+              <p className="font-normal text-gray-700 ">{item.bookAuthor}</p>
+              <p className="text-gray-500 font-light">{item.bookGenre}</p>
+            </div>
+          ))
+        ) : (
+          <p>ahaha</p>
+        )}
+      </div>
     </div>
   );
 }

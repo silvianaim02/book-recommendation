@@ -21,7 +21,7 @@ export async function POST(req) {
 
   try {
     if (!title || !author || !genre) {
-      return NextResponse.json({ error: 'please fill the form' }, {status: 401});
+      return NextResponse.json({ error: 'please fill the form' }, {status: 400});
     }
     const newEntry = await prisma.bookRecommendation.create({
       data: {
